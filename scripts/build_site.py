@@ -32,9 +32,9 @@ except ImportError:
     lazy_pinyin = None  # 没有 pypinyin 时退化为纯 ASCII slug
 
 # ────────────────────────── 站点信息（可自由修改） ──────────────────────────
-SITE_NAME = "夜路回声"
-SITE_LATIN = "Echoes of the Night Road"
-SITE_TAGLINE = "在失真的噪音里寻找文学 —— 一份黑暗、金属与诗交织的乐评存档"
+SITE_NAME = "偏执病患"
+SITE_LATIN = "Paranoid patients"
+SITE_TAGLINE = "在失真的噪音里寻找文学"
 SITE_GITHUB = "https://github.com/Trancer2Thrash/MyPost"
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -143,7 +143,7 @@ def render_body(md_text: str, title: str) -> str:
 # ────────────────────────── 样式与模板 ──────────────────────────
 
 CSS = r"""
-/* 夜路回声 —— 黑暗 / 金属 / 哥特 / 奇幻 */
+/* Paranoidpatients —— / 金属 / 哥特 / 摇滚 */
 :root {
   --bg: #07060a;
   --panel: #100d15;
