@@ -92,6 +92,27 @@ def git_creation_date(path: Path):
     return None
 
 
+# 文章日期覆盖：文件名（小写）包含键 → 固定显示日期。
+# 未命中的文章仍按 git 首次提交时间。
+_LOCAL_TZ = datetime.now().astimezone().tzinfo
+DATE_OVERRIDES = {
+    "korn": datetime(2026, 8, 5, 12, 0, tzinfo=_LOCAL_TZ),
+    "my chemical romance": datetime(2026, 8, 4, 12, 0, tzinfo=_LOCAL_TZ),
+    "aphex twin": datetime(2026, 8, 3, 12, 0, tzinfo=_LOCAL_TZ),
+    "joydivision": datetime(2026, 8, 3, 11, 0, tzinfo=_LOCAL_TZ),
+}
+
+
+def article_date(md_file: Path):
+    """日期优先级：DATE_OVERRIDES > git 首次提交时间 > 文件修改时间。"""
+    name = md_file.name.lower()
+    for key, d in DATE_OVERRIDES.items():
+        if key in name:
+            return d
+    return (git_creation_date(md_file)
+            or datetime.fromtimestamp(md_file.stat().st_mtime).astimezone())
+
+
 def extract_title(text: str, fallback: str):
     """取第一个一级标题作为文章标题。"""
     m = re.search(r"^#\s+(.+?)\s*$", text, re.M)
@@ -850,7 +871,7 @@ def collect_articles():
         if not text.strip():
             continue
         title = extract_title(text, md_file.stem)
-        date = git_creation_date(md_file) or datetime.fromtimestamp(md_file.stat().st_mtime).astimezone()
+        date = article_date(md_file)
         words = count_words(text)
         articles.append({
             "path": md_file,
