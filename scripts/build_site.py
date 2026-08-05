@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-偏执病患 · 静态站点生成器
-========================
-把仓库根目录下的 Markdown 乐评文章转换成黑暗哥特风格的静态网站，
+偏执病患 · 静态站点生成器（粗野主义 Brutalism 版）
+====================================================
+把仓库根目录下的 Markdown 乐评文章转换成粗野主义风格的静态网站，
 输出到 _site/，由 GitHub Actions 部署到 GitHub Pages。
 
-用法（本地预览）：
+内置三套粗野主义主题，可在下方 THEME 常量或命令行切换：
+    brutal-raw       灰纸单栏 · 仿 brutalistwebsites.com（等宽字体、无装饰、生硬反色）
+    brutal-terminal  黑底绿字 · 终端机美学（等宽、命令行语感、暗调图片）
+    brutal-zine      白纸印刷 · 新粗野主义印刷物（硬阴影、红黄撞色、歪斜贴纸感）
+
+用法：
     pip install markdown pypinyin
-    python scripts/build_site.py
-    # 然后用浏览器打开 _site/index.html
+    python scripts/build_site.py                  # 使用默认主题构建到 _site/
+    python scripts/build_site.py --theme brutal-zine --out _preview/zine
 """
 
+import argparse
 import html
 import re
 import shutil
@@ -37,9 +43,11 @@ SITE_LATIN = "Paranoid patients"
 SITE_TAGLINE = "在失真的噪音里寻找文学"
 SITE_GITHUB = "https://github.com/Trancer2Thrash/MyPost"
 
+# 默认主题：brutal-raw / brutal-terminal / brutal-zine
+THEME = "brutal-zine"
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "_site"
-POSTS_OUT = OUT / "posts"
 
 EXCLUDE_FILES = {"README.md", "AGENTS.md", "CLAUDE.md"}
 
@@ -135,358 +143,636 @@ def render_body(md_text: str, title: str) -> str:
     body = re.sub(r"<h1[^>]*>.*?</h1>\s*", "", body, count=1, flags=re.S)
     body = body.replace('src="images/', 'src="../images/')
     body = body.replace("src='./images/", "src='../images/")
-    # 给正文第一个段落加首字下沉
-    body = re.sub(r"<p>", '<p class="lead">', body, count=1)
     return body
 
 
-# ────────────────────────── 样式与模板 ──────────────────────────
+def fill(tmpl: str, **kw) -> str:
+    for k, v in kw.items():
+        tmpl = tmpl.replace("__" + k + "__", str(v))
+    return tmpl
 
-CSS = r"""
-/* Paranoidpatients —— / 金属 / 哥特 / 摇滚 */
+
+# ────────────────────────── 字体与图标 ──────────────────────────
+
+FONT_MONO = (
+    '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    '<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700'
+    '&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">'
+)
+
+FONT_ZINE = (
+    '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    '<link href="https://fonts.googleapis.com/css2?family=Archivo+Black'
+    '&family=IBM+Plex+Mono:wght@400;700'
+    '&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">'
+)
+
+
+def favicon(color: str) -> str:
+    return ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' "
+            "viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90' "
+            f"fill='{color}'%3E%E2%9C%A0%3C/text%3E%3C/svg%3E")
+
+
+# ────────────────────────── 主题一：brutal-raw ──────────────────────────
+# 仿 brutalistwebsites.com：#eee 灰底、等宽字体、无阴影无圆角、老式链接蓝、
+# 悬停时生硬反色，像一份未经排版的档案清单。
+
+CSS_RAW = r"""
+/* 偏执病患 —— BRUTALISM / brutal-raw：仿 brutalistwebsites.com */
 :root {
-  --bg: #07060a;
-  --panel: #100d15;
-  --panel-2: #16121d;
-  --line: #2b2433;
-  --text: #cfc8ba;
-  --text-dim: #8d8577;
-  --gold: #c9a45c;
-  --gold-bright: #e8c987;
-  --blood: #8a1f2b;
-  --blood-bright: #c0303f;
-  --silver: #a9a4b4;
-  --font-serif-han: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
-  --font-black-letter: "Pirata One", "UnifrakturMaguntia", "Cinzel", var(--font-serif-han), serif;
-  --font-caps: "Cinzel", "Times New Roman", var(--font-serif-han), serif;
+  --bg: #eee;
+  --paper: #fff;
+  --ink: #000;
+  --dim: #555;
+  --accent: #0000ee;
+  --mono: "IBM Plex Mono", "Courier New", "Courier", "Noto Sans SC", monospace;
 }
-
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-
 body {
   margin: 0;
-  background-color: var(--bg);
-  background-image:
-    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(138, 31, 43, 0.16), transparent 70%),
-    radial-gradient(ellipse 70% 50% at 50% 115%, rgba(90, 60, 130, 0.10), transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  background-attachment: fixed;
-  color: var(--text);
-  font-family: var(--font-serif-han);
-  font-size: 17px;
-  line-height: 1.9;
-  border-top: 3px solid transparent;
-  border-image: linear-gradient(90deg, transparent, var(--blood) 25%, var(--gold) 50%, var(--blood) 75%, transparent) 1;
-}
-
-::selection { background: var(--blood); color: #f5e9d0; }
-
-::-webkit-scrollbar { width: 10px; }
-::-webkit-scrollbar-track { background: #0b0910; }
-::-webkit-scrollbar-thumb { background: #332a3f; border-radius: 5px; }
-::-webkit-scrollbar-thumb:hover { background: #4a3d59; }
-
-a { color: var(--gold); text-decoration: none; transition: color .25s ease; }
-a:hover { color: var(--gold-bright); }
-
-.container { max-width: 880px; margin: 0 auto; padding: 0 22px; }
-
-/* ── 站首 ── */
-.site-header { text-align: center; padding: 72px 0 30px; }
-
-.sigil {
-  color: var(--blood-bright);
-  letter-spacing: 1.2em;
-  text-indent: 1.2em;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
   font-size: 15px;
-  margin-bottom: 14px;
-  animation: flicker 4.5s ease-in-out infinite;
+  line-height: 1.7;
 }
-@keyframes flicker {
-  0%, 100% { opacity: .85; text-shadow: 0 0 6px rgba(192, 48, 63, .35); }
-  50% { opacity: .45; text-shadow: none; }
-}
+::selection { background: #000; color: #eee; }
+a { color: var(--accent); text-decoration: underline; }
+a:hover { background: #000; color: #fff; }
+.container { max-width: 980px; margin: 0 auto; padding: 0 20px; }
 
+/* 站首 */
+.site-header { padding: 46px 0 0; }
+.sigil { font-size: 13px; letter-spacing: .6em; color: var(--dim); }
 .site-title {
-  margin: 0;
-  font-family: var(--font-serif-han);
-  font-weight: 900;
-  font-size: clamp(38px, 7vw, 58px);
-  letter-spacing: .22em;
-  text-indent: .22em;
-  background: linear-gradient(180deg, #f0dcae 0%, var(--gold) 45%, #8a6c33 80%, #c9a45c 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  filter: drop-shadow(0 2px 14px rgba(201, 164, 92, .18));
-}
-
-.site-latin {
-  margin: 10px 0 0;
-  font-family: var(--font-black-letter);
-  font-size: clamp(17px, 3vw, 24px);
-  letter-spacing: .34em;
-  text-indent: .34em;
-  color: var(--silver);
-  opacity: .85;
-}
-
-.rule {
-  display: flex; align-items: center; gap: 14px;
-  max-width: 460px; margin: 22px auto 14px;
-  color: var(--gold);
-}
-.rule::before, .rule::after {
-  content: ""; flex: 1; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line));
-}
-.rule::after { background: linear-gradient(90deg, var(--line), transparent); }
-.rule .orn { font-size: 14px; opacity: .9; }
-
-.tagline {
-  margin: 0 auto;
-  max-width: 560px;
-  color: var(--text-dim);
-  font-size: 14.5px;
-  letter-spacing: .14em;
-}
-
-/* ── 收录计数 ── */
-.archive-count {
-  text-align: center;
-  margin: 44px 0 26px;
-  font-family: var(--font-caps);
-  font-size: 13px;
-  letter-spacing: .45em;
-  text-indent: .45em;
-  color: var(--silver);
+  margin: 6px 0 0;
+  font-size: clamp(42px, 8vw, 72px);
+  font-weight: 700;
+  letter-spacing: -.02em;
   text-transform: uppercase;
+  line-height: 1.05;
 }
-
-/* ── 文章卡片 ── */
-.card {
-  position: relative;
-  display: block;
-  margin: 0 0 22px;
-  padding: 26px 30px 24px;
-  background: linear-gradient(160deg, var(--panel) 0%, var(--panel-2) 100%);
-  border: 1px solid var(--line);
-  color: var(--text);
-  transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
-}
-.card::before {
-  content: "";
-  position: absolute; top: -1px; left: 12%; right: 12%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(201, 164, 92, .55), transparent);
-}
-.card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(201, 164, 92, .5);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, .55), 0 0 24px rgba(138, 31, 43, .14);
-  color: var(--text);
-}
-
-.card h2 {
-  margin: 0 0 8px;
-  font-size: 23px;
-  font-weight: 900;
-  letter-spacing: .06em;
-  line-height: 1.5;
-  color: #e6d9bd;
-}
-.card:hover h2 { color: var(--gold-bright); }
-
-.card .meta {
-  font-family: var(--font-caps);
-  font-size: 11.5px;
-  letter-spacing: .22em;
-  color: var(--silver);
-  opacity: .8;
-  margin-bottom: 12px;
-}
-.card .meta .sep { color: var(--blood-bright); padding: 0 7px; }
-
-.card .excerpt {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 15px;
-  line-height: 1.95;
-  text-align: justify;
-}
-
-.card .enter {
-  display: inline-block;
-  margin-top: 14px;
-  font-family: var(--font-caps);
-  font-size: 12px;
+.site-title a { color: #000; text-decoration: none; }
+.site-title a:hover { background: #000; color: #eee; }
+.site-latin {
+  margin: 6px 0 0;
+  font-size: 13.5px;
   letter-spacing: .3em;
-  color: var(--gold);
+  text-transform: uppercase;
+  color: var(--dim);
 }
-.card:hover .enter { color: var(--blood-bright); }
+.rule { border-top: 4px solid #000; margin: 20px 0 12px; }
+.rule .orn { display: none; }
+.tagline { margin: 0 0 6px; font-size: 14px; color: var(--dim); max-width: 640px; }
 
-/* ── 文章页 ── */
-.back {
-  display: inline-block;
-  margin: 40px 0 6px;
-  font-family: var(--font-caps);
-  font-size: 12.5px;
-  letter-spacing: .28em;
-  color: var(--silver);
+.hero { margin: 24px 0 0; border: 3px solid #000; background: #fff; }
+.hero img {
+  display: block; width: 100%; height: 260px; object-fit: cover;
+  filter: grayscale(1) contrast(1.15);
 }
-.back:hover { color: var(--gold-bright); }
+.hero figcaption {
+  font-size: 11px; letter-spacing: .08em;
+  padding: 6px 10px; border-top: 3px solid #000;
+  background: #fff; color: var(--dim); text-transform: uppercase;
+}
 
-.post-header { text-align: center; padding: 26px 0 8px; }
+/* 首页卡片 */
+.archive-count {
+  margin: 36px 0 14px;
+  font-size: 13px; letter-spacing: .2em; text-transform: uppercase;
+  border-bottom: 2px solid #000; padding-bottom: 6px;
+}
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card {
+  display: block;
+  background: var(--paper);
+  border: 3px solid #000;
+  padding: 18px;
+  color: #000;
+  text-decoration: none;
+}
+.card:hover { background: #000; color: #fff; }
+.card h2 { margin: 0 0 8px; font-size: 19px; line-height: 1.45; letter-spacing: 0; color: inherit; }
+.card .meta {
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 10px;
+}
+.card:hover .meta { color: #aaa; }
+.card .meta .sep { padding: 0 6px; }
+.card .excerpt { margin: 0; font-size: 13px; line-height: 1.75; color: inherit; }
+.card:hover .excerpt { color: #ddd; }
+.card .enter { display: inline-block; margin-top: 12px; font-size: 12px; letter-spacing: .2em; }
+
+/* 文章页 */
+.back { display: inline-block; margin: 34px 0 0; font-size: 13px; letter-spacing: .15em; }
+.post-header { padding: 20px 0 0; }
 .post-header h1 {
-  margin: 0;
-  font-size: clamp(28px, 5.4vw, 40px);
-  font-weight: 900;
-  letter-spacing: .08em;
-  line-height: 1.5;
-  color: #efe3c6;
-  text-shadow: 0 2px 18px rgba(201, 164, 92, .15);
+  margin: 8px 0 0;
+  font-size: clamp(30px, 5.5vw, 46px);
+  line-height: 1.3; font-weight: 700; color: #000;
 }
 .post-header .meta {
-  margin-top: 14px;
-  font-family: var(--font-caps);
-  font-size: 12px;
-  letter-spacing: .26em;
-  color: var(--silver);
+  font-size: 12px; color: var(--dim); letter-spacing: .12em;
+  margin-top: 10px; text-transform: uppercase;
 }
-.post-header .meta .sep { color: var(--blood-bright); padding: 0 8px; }
-
+.post-header .meta .sep { padding: 0 6px; }
 .post-rule {
-  text-align: center;
-  color: var(--gold);
-  margin: 26px 0 34px;
-  letter-spacing: .8em;
-  text-indent: .8em;
-  font-size: 13px;
-  opacity: .8;
+  text-align: left; color: #000; margin: 18px 0 26px;
+  letter-spacing: 0; font-size: 13px; opacity: 1;
+  overflow: hidden; white-space: nowrap;
 }
 
 .content { max-width: 760px; margin: 0 auto; }
-.content p { margin: 0 0 1.35em; text-align: justify; }
-.content p.lead::first-letter {
-  float: left;
-  font-size: 2.9em;
-  line-height: 1;
-  padding: 4px 10px 0 0;
-  color: var(--blood-bright);
-  font-weight: 900;
-  text-shadow: 0 0 18px rgba(192, 48, 63, .35);
-}
-
+.content p { margin: 0 0 1.2em; }
 .content h2, .content h3, .content h4 {
-  font-weight: 900;
-  letter-spacing: .08em;
-  color: #e6d9bd;
-  margin: 2.2em 0 1em;
+  font-weight: 700; letter-spacing: 0;
+  margin: 2em 0 .8em; text-transform: uppercase; color: #000;
 }
-.content h2 {
-  font-size: 24px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
-  position: relative;
-}
-.content h2::after {
-  content: "";
-  position: absolute; left: 0; bottom: -1px;
-  width: 74px; height: 1px;
-  background: linear-gradient(90deg, var(--gold), transparent);
-}
-.content h3 { font-size: 20px; }
-
-.content a { border-bottom: 1px dotted rgba(201, 164, 92, .5); }
-.content a:hover { border-bottom-color: var(--blood-bright); }
-
+.content h2 { font-size: 20px; border-bottom: 3px solid #000; padding-bottom: 6px; }
+.content h2::after { content: none; }
+.content h3 { font-size: 17px; }
+.content a { color: var(--accent); border-bottom: none; }
+.content a:hover { background: #000; color: #fff; border-bottom: none; }
 .content blockquote {
-  margin: 1.8em 0;
-  padding: 14px 22px;
-  border-left: 3px solid var(--gold);
-  background: rgba(201, 164, 92, .05);
-  color: var(--text-dim);
-  font-size: 15.5px;
+  margin: 1.6em 0; padding: 12px 18px;
+  border-left: 6px solid #000; background: none;
+  color: var(--dim); font-size: 14px;
 }
 .content blockquote p { margin: .3em 0; }
-
 .content img {
-  display: block;
-  max-width: 100%;
-  margin: 2em auto;
-  border: 1px solid var(--line);
-  padding: 6px;
-  background: #0c0a11;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, .6);
+  display: block; max-width: 100%; margin: 1.8em 0;
+  border: 3px solid #000; padding: 0; background: none; box-shadow: none;
+  filter: contrast(1.05);
 }
-
-.content em { color: var(--silver); }
-.content strong { color: #e6d9bd; }
-.content hr {
-  border: none;
-  text-align: center;
-  margin: 2.6em 0;
-}
-.content hr::after {
-  content: "✠ ─── ✠ ─── ✠";
-  color: var(--line);
-  letter-spacing: .4em;
-  font-size: 12px;
-}
-
-.content ol, .content ul { padding-left: 1.6em; }
-.content li { margin-bottom: .45em; }
-.content li::marker { color: var(--gold); }
-
+.content em { color: inherit; }
+.content strong { color: #000; }
+.content hr { border: none; margin: 2em 0; text-align: left; }
+.content hr::after { content: "————————————"; color: #000; letter-spacing: 0; font-size: 14px; }
+.content ol, .content ul { padding-left: 1.5em; }
+.content li { margin-bottom: .4em; }
+.content li::marker { color: #000; }
 .content code {
-  background: #16121d;
-  border: 1px solid var(--line);
-  padding: 2px 6px;
-  font-size: .9em;
-  color: var(--gold-bright);
+  background: #fff; border: 1px solid #000; padding: 1px 5px;
+  font-family: var(--mono); font-size: .9em; color: #000;
 }
 .content pre {
-  background: #0c0a11;
-  border: 1px solid var(--line);
-  padding: 16px 18px;
-  overflow-x: auto;
+  background: #000; color: #eee; border: 3px solid #000;
+  padding: 14px; overflow-x: auto;
 }
-.content pre code { border: none; background: none; padding: 0; }
+.content pre code { background: none; border: none; color: inherit; }
+.content table { width: 100%; border-collapse: collapse; margin: 1.6em 0; font-size: 13.5px; }
+.content th, .content td { border: 2px solid #000; padding: 6px 10px; text-align: left; }
+.content th { background: #000; color: #eee; }
 
-.content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.8em 0;
-  font-size: 15px;
-}
-.content th, .content td {
-  border: 1px solid var(--line);
-  padding: 8px 12px;
-  text-align: left;
-}
-.content th { color: var(--gold); background: rgba(201, 164, 92, .06); }
-
-/* ── 页脚 ── */
+/* 页脚 */
 .site-footer {
-  margin-top: 80px;
-  padding: 34px 0 46px;
-  text-align: center;
-  color: var(--text-dim);
-  font-size: 13px;
-  letter-spacing: .12em;
-  border-top: 1px solid #1a1620;
+  margin-top: 70px; padding: 26px 0 40px;
+  border-top: 4px solid #000;
+  text-align: left; font-size: 12px; letter-spacing: .08em; color: var(--dim);
 }
-.site-footer .orn { color: var(--blood-bright); }
-.site-footer a { color: var(--silver); border-bottom: 1px dotted #443c52; }
-.site-footer a:hover { color: var(--gold-bright); }
+.site-footer a { color: var(--accent); border-bottom: none; }
+.site-footer .orn { color: #000; }
 
-@media (max-width: 620px) {
-  body { font-size: 16px; }
-  .card { padding: 20px 18px; }
-  .content p:first-of-type::first-letter { font-size: 2.4em; }
+@media (max-width: 700px) {
+  .cards { grid-template-columns: 1fr; }
+  .hero img { height: 180px; }
 }
 """
+
+# ────────────────────────── 主题二：brutal-terminal ──────────────────────────
+# 黑底终端：等宽字体、白色/绿色文本、命令行语感、暗调灰阶图片。
+
+CSS_TERMINAL = r"""
+/* 偏执病患 —— BRUTALISM / brutal-terminal：黑底绿字终端机 */
+:root {
+  --bg: #000;
+  --fg: #d8d8d8;
+  --green: #00e05a;
+  --dim: #6f6f6f;
+  --line: #2a2a2a;
+  --mono: "IBM Plex Mono", "Courier New", "Noto Sans SC", monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.75;
+}
+::selection { background: var(--green); color: #000; }
+a { color: var(--green); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { background: var(--green); color: #000; }
+.container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+/* 站首 */
+.site-header { padding: 52px 0 0; }
+.sigil { color: var(--green); font-size: 13px; letter-spacing: .5em; }
+.site-title {
+  margin: 8px 0 0;
+  font-size: clamp(40px, 7.5vw, 66px);
+  font-weight: 700; color: #fff;
+  text-transform: uppercase; letter-spacing: .02em; line-height: 1.08;
+}
+.site-title a { color: #fff; text-decoration: none; }
+.site-title a:hover { color: var(--green); background: none; }
+.site-title::after {
+  content: "▮"; color: var(--green);
+  animation: blink 1.1s steps(1) infinite;
+  margin-left: 8px;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.site-latin {
+  margin: 6px 0 0; color: var(--green);
+  font-size: 13px; letter-spacing: .28em; text-transform: uppercase;
+}
+.rule { border-top: 1px dashed var(--line); margin: 22px 0 12px; }
+.rule .orn { display: none; }
+.tagline { margin: 0; color: var(--dim); font-size: 13.5px; }
+.tagline::before { content: "$ "; color: var(--green); }
+
+.hero { margin: 26px 0 0; border: 1px solid var(--line); }
+.hero img {
+  display: block; width: 100%; height: 240px; object-fit: cover;
+  filter: grayscale(1) contrast(1.3) brightness(.8);
+}
+.hero figcaption {
+  font-size: 11px; color: var(--dim);
+  border-top: 1px dashed var(--line); padding: 6px 10px;
+}
+.hero figcaption::before { content: "// "; color: var(--green); }
+
+/* 首页卡片 */
+.archive-count {
+  margin: 38px 0 12px;
+  font-size: 12px; color: var(--green);
+  letter-spacing: .18em; text-transform: uppercase;
+}
+.archive-count::before { content: "> "; }
+.cards { display: block; }
+.card {
+  display: block;
+  border: 1px solid var(--line);
+  margin-bottom: 14px; padding: 16px 18px;
+  color: var(--fg); text-decoration: none;
+}
+.card:hover { border-color: var(--green); background: #06130a; }
+.card h2 {
+  margin: 0 0 6px; font-size: 18px; color: #fff;
+  letter-spacing: 0; line-height: 1.5;
+}
+.card h2::before { content: "# "; color: var(--green); }
+.card:hover h2 { color: var(--green); }
+.card .meta {
+  font-size: 11px; color: var(--dim);
+  letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px;
+}
+.card .meta .sep { color: var(--green); padding: 0 6px; }
+.card .excerpt { margin: 0; font-size: 13px; color: #a8a8a8; }
+.card .enter { display: inline-block; margin-top: 10px; font-size: 12px; color: var(--green); letter-spacing: .15em; }
+
+/* 文章页 */
+.back { display: inline-block; margin: 36px 0 0; font-size: 12.5px; letter-spacing: .12em; }
+.post-header { padding: 18px 0 0; }
+.post-header h1 { margin: 6px 0 0; font-size: clamp(28px, 5vw, 42px); color: #fff; line-height: 1.35; }
+.post-header .meta {
+  font-size: 11.5px; color: var(--dim); margin-top: 10px;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.post-header .meta .sep { color: var(--green); padding: 0 6px; }
+.post-rule { color: var(--green); margin: 20px 0 26px; letter-spacing: .3em; font-size: 12px; }
+
+.content { max-width: 760px; margin: 0 auto; }
+.content p { margin: 0 0 1.25em; }
+.content h2, .content h3, .content h4 { color: #fff; font-weight: 700; }
+.content h2 {
+  font-size: 20px; text-transform: uppercase; letter-spacing: .04em;
+  border-left: 4px solid var(--green); padding-left: 10px;
+  margin: 2em 0 .9em;
+}
+.content h2::after { content: none; }
+.content h3 { font-size: 17px; margin: 1.8em 0 .8em; }
+.content h3::before { content: "## "; color: var(--green); }
+.content a { border-bottom: none; }
+.content a:hover { border-bottom: none; }
+.content blockquote {
+  border-left: 4px solid var(--green);
+  background: rgba(0, 224, 90, .06);
+  padding: 12px 18px; margin: 1.6em 0;
+  color: #b8b8b8; font-size: 14px;
+}
+.content blockquote p { margin: .3em 0; }
+.content img {
+  display: block; max-width: 100%; margin: 1.8em 0;
+  border: 1px solid var(--line); padding: 0; background: none; box-shadow: none;
+  filter: grayscale(1) contrast(1.25) brightness(.85);
+}
+.content strong { color: #fff; }
+.content em { color: var(--green); font-style: normal; }
+.content hr { border: none; margin: 2.2em 0; }
+.content hr::after { content: "✠ ──────────── ✠"; color: var(--line); font-size: 12px; letter-spacing: .3em; }
+.content ol, .content ul { padding-left: 1.5em; }
+.content li { margin-bottom: .4em; }
+.content li::marker { color: var(--green); }
+.content code {
+  background: #0a0a0a; border: 1px solid var(--line);
+  color: var(--green); padding: 1px 5px;
+  font-family: var(--mono); font-size: .9em;
+}
+.content pre { background: #050505; border: 1px solid var(--line); padding: 14px; overflow-x: auto; }
+.content pre code { border: none; background: none; }
+.content table { width: 100%; border-collapse: collapse; margin: 1.6em 0; font-size: 13.5px; }
+.content th, .content td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+.content th { color: var(--green); text-transform: uppercase; font-size: 12px; letter-spacing: .08em; }
+
+/* 页脚 */
+.site-footer {
+  margin-top: 72px; padding: 24px 0 40px;
+  border-top: 1px dashed var(--line);
+  text-align: left; font-size: 12px; color: var(--dim);
+}
+.site-footer .orn { color: var(--green); }
+.site-footer a { border-bottom: none; }
+
+@media (max-width: 700px) {
+  .hero img { height: 170px; }
+}
+"""
+
+# ────────────────────────── 主题三：brutal-zine ──────────────────────────
+# 新粗野主义印刷物：白纸、粗黑边框、硬投影、红黄撞色、歪斜贴纸感。
+
+CSS_ZINE = r"""
+/* 偏执病患 —— BRUTALISM / brutal-zine：新粗野主义印刷物 */
+:root {
+  --bg: #f2f0e9;
+  --ink: #111;
+  --red: #ff2d1a;
+  --blue: #1b3cff;
+  --yellow: #ffe600;
+  --display: "Archivo Black", "Arial Black", "Noto Sans SC", sans-serif;
+  --body-font: "Noto Sans SC", Arial, sans-serif;
+  --mono: "IBM Plex Mono", "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body-font);
+  font-size: 16px;
+  line-height: 1.8;
+}
+::selection { background: var(--red); color: #fff; }
+a { color: var(--blue); text-decoration: underline; text-decoration-thickness: 2px; }
+a:hover { background: var(--yellow); color: #000; }
+.container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+
+/* 站首 */
+.site-header { padding: 54px 0 0; }
+.sigil { font-size: 14px; letter-spacing: .7em; color: var(--red); }
+.site-title {
+  margin: 10px 0 0;
+  font-family: var(--display);
+  font-size: clamp(46px, 9vw, 84px);
+  line-height: 1; text-transform: uppercase; letter-spacing: -.01em;
+  font-weight: 400;
+}
+.site-title a { color: var(--ink); text-decoration: none; }
+.site-title a:hover { background: var(--red); color: #fff; }
+.site-latin {
+  display: inline-block; margin-top: 12px;
+  font-family: var(--display); font-weight: 400;
+  font-size: 13px; letter-spacing: .3em; text-transform: uppercase;
+  background: var(--ink); color: var(--bg);
+  padding: 4px 10px; transform: rotate(-1deg);
+}
+.rule { margin: 26px 0 14px; border-top: 5px solid var(--ink); position: relative; }
+.rule .orn {
+  position: absolute; top: -13px; left: 24px;
+  background: var(--bg); padding: 0 8px;
+  color: var(--red); font-size: 15px;
+}
+.tagline { margin: 0; font-size: 15px; font-weight: 700; max-width: 620px; }
+
+.hero {
+  margin: 28px 0 0;
+  border: 4px solid var(--ink);
+  box-shadow: 10px 10px 0 var(--ink);
+  background: #fff;
+  transform: rotate(-.4deg);
+}
+.hero img {
+  display: block; width: 100%; height: 280px; object-fit: cover;
+  filter: grayscale(1) contrast(1.2);
+}
+.hero figcaption {
+  font-size: 12px; font-weight: 700;
+  padding: 8px 12px; border-top: 4px solid var(--ink);
+  background: var(--yellow);
+}
+
+/* 首页卡片 */
+.archive-count {
+  display: inline-block; margin: 42px 0 20px;
+  font-family: var(--display); font-weight: 400;
+  font-size: 14px; letter-spacing: .12em; text-transform: uppercase;
+  background: var(--red); color: #fff;
+  padding: 6px 14px; transform: rotate(.6deg);
+}
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.card {
+  display: block;
+  background: #fff;
+  border: 4px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+  padding: 20px;
+  color: var(--ink); text-decoration: none;
+  transform: rotate(-.3deg);
+}
+.cards .card:nth-child(even) { transform: rotate(.4deg); }
+.card:hover {
+  transform: translate(-3px, -3px) rotate(0deg);
+  box-shadow: 12px 12px 0 var(--red);
+  color: var(--ink);
+}
+.card h2 {
+  margin: 0 0 8px;
+  font-family: var(--display); font-weight: 400;
+  font-size: 19px; line-height: 1.4; text-transform: uppercase; letter-spacing: 0;
+  color: inherit;
+}
+.card:hover h2 { color: var(--red); }
+.card .meta {
+  font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase;
+  color: #666; margin-bottom: 10px; font-weight: 700;
+}
+.card .meta .sep { color: var(--red); padding: 0 6px; }
+.card .excerpt { margin: 0; font-size: 13.5px; line-height: 1.8; }
+.card .enter {
+  display: inline-block; margin-top: 14px;
+  font-family: var(--display); font-weight: 400;
+  font-size: 12px; letter-spacing: .14em;
+  background: var(--ink); color: #fff;
+  padding: 4px 10px;
+}
+.card:hover .enter { background: var(--red); color: #fff; }
+
+/* 文章页 */
+.back {
+  display: inline-block; margin: 40px 0 0;
+  font-family: var(--display); font-weight: 400;
+  font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
+  background: var(--ink); color: #fff;
+  padding: 6px 12px; text-decoration: none;
+}
+.back:hover { background: var(--red); color: #fff; }
+.post-header { padding: 22px 0 0; }
+.post-header h1 {
+  margin: 8px 0 0;
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(30px, 6vw, 52px);
+  line-height: 1.18; text-transform: uppercase; color: var(--ink);
+}
+.post-header .meta {
+  font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: #555; margin-top: 14px;
+}
+.post-header .meta .sep { color: var(--red); padding: 0 6px; }
+.post-rule { color: var(--red); margin: 22px 0 28px; letter-spacing: .5em; font-size: 14px; }
+
+.content { max-width: 760px; margin: 0 auto; }
+.content p { margin: 0 0 1.25em; }
+.content h2, .content h3, .content h4 { color: var(--ink); }
+.content h2 {
+  font-family: var(--display); font-weight: 400;
+  font-size: 21px; margin: 2.1em 0 .9em; text-transform: uppercase;
+  background: var(--yellow); display: inline-block; padding: 2px 10px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.content h2::after { content: none; }
+.content h3 {
+  font-family: var(--display); font-weight: 400;
+  font-size: 17px; margin: 1.9em 0 .8em; text-transform: uppercase;
+  border-left: 8px solid var(--red); padding-left: 10px;
+}
+.content a { border-bottom: none; color: var(--blue); }
+.content a:hover { background: var(--yellow); color: #000; border-bottom: none; }
+.content blockquote {
+  margin: 1.7em 0; padding: 14px 20px;
+  border: 3px solid var(--ink); background: #fff;
+  box-shadow: 6px 6px 0 var(--ink);
+  color: var(--ink); font-size: 15px;
+}
+.content blockquote p { margin: .3em 0; }
+.content img {
+  display: block; max-width: 100%; margin: 2em 0;
+  border: 4px solid var(--ink); padding: 0;
+  box-shadow: 8px 8px 0 var(--ink); background: none;
+  filter: contrast(1.08) saturate(1.05);
+}
+.content em { color: inherit; }
+.content strong { background: var(--yellow); padding: 0 3px; color: var(--ink); }
+.content hr { border: none; margin: 2.4em 0; }
+.content hr::after { content: "✠ ✠ ✠"; color: var(--ink); font-size: 15px; letter-spacing: .8em; }
+.content ol, .content ul { padding-left: 1.6em; }
+.content li { margin-bottom: .45em; }
+.content li::marker { color: var(--red); font-weight: 900; }
+.content code {
+  background: #fff; border: 2px solid var(--ink); padding: 1px 5px;
+  font-family: var(--mono); font-size: .88em; color: var(--ink);
+}
+.content pre {
+  background: var(--ink); color: #f5f2e8;
+  border: 4px solid var(--ink); padding: 16px; overflow-x: auto;
+}
+.content pre code { background: none; border: none; color: inherit; }
+.content table {
+  width: 100%; border-collapse: collapse; margin: 1.7em 0;
+  font-size: 14px; background: #fff;
+}
+.content th, .content td { border: 3px solid var(--ink); padding: 7px 11px; text-align: left; }
+.content th {
+  background: var(--yellow); text-transform: uppercase;
+  font-size: 12.5px; letter-spacing: .06em;
+}
+
+/* 页脚 */
+.site-footer {
+  margin-top: 80px; padding: 28px 0 44px;
+  border-top: 5px solid var(--ink);
+  text-align: left; font-size: 13px; font-weight: 700;
+  color: var(--ink);
+}
+.site-footer .orn { color: var(--red); }
+.site-footer a { border-bottom: none; }
+
+@media (max-width: 700px) {
+  .cards { grid-template-columns: 1fr; }
+  .hero { transform: none; }
+  .hero img { height: 190px; }
+}
+"""
+
+# ────────────────────────── 主题注册表 ──────────────────────────
+
+HERO_TMPL = (
+    '<figure class="hero">'
+    '<img src="images/brutal/__IMG__" alt="粗野主义混凝土建筑">'
+    '<figcaption>__CAP__</figcaption>'
+    '</figure>'
+)
+
+THEMES = {
+    "brutal-raw": {
+        "label": "RAW 灰纸档案 · 仿 brutalistwebsites.com",
+        "css": CSS_RAW,
+        "fonts": FONT_MONO,
+        "favicon": favicon("%23000000"),
+        "sigil": "✠ ✠ ✠",
+        "rule_orn": "",
+        "enter": "✠ ▸",
+        "post_rule": "─" * 46,
+        "hero": fill(HERO_TMPL, IMG="concrete-03.jpg",
+                     CAP="FIG.01 // 清水混凝土住宅 · 重复的阳台板"),
+        "footnote": ('手稿存于 <a href="' + SITE_GITHUB +
+                     '" target="_blank" rel="noopener">GitHub</a> · 由 GitHub Actions 构建'),
+    },
+    "brutal-terminal": {
+        "label": "黑底终端 · 绿字等宽命令行",
+        "css": CSS_TERMINAL,
+        "fonts": FONT_MONO,
+        "favicon": favicon("%2300e05a"),
+        "sigil": "✠ ✠ ✠",
+        "rule_orn": "",
+        "enter": ">> ✠ >>",
+        "post_rule": "✠ ────── ✠",
+        "hero": fill(HERO_TMPL, IMG="concrete-02.jpg",
+                     CAP="img/002.raw — 混凝土中庭"),
+        "footnote": ('manuscripts @ <a href="' + SITE_GITHUB +
+                     '" target="_blank" rel="noopener">github</a> // built by github actions'),
+    },
+    "brutal-zine": {
+        "label": "白纸印刷 · 新粗野主义撞色",
+        "css": CSS_ZINE,
+        "fonts": FONT_ZINE,
+        "favicon": favicon("%23ff2d1a"),
+        "sigil": "✠ ✠ ✠",
+        "rule_orn": "✠",
+        "enter": "✠ ➔",
+        "post_rule": "✠ ── ✠ ── ✠",
+        "hero": fill(HERO_TMPL, IMG="concrete-01.jpg",
+                     CAP="混凝土 × 空中连桥 — 粗野主义档案 No.1"),
+        "footnote": ('手稿存于 <a href="' + SITE_GITHUB +
+                     '" target="_blank" rel="noopener">GitHub</a> — GitHub Actions 构建'),
+    },
+}
+
+# ────────────────────────── 模板 ──────────────────────────
 
 HEAD_TMPL = """<!DOCTYPE html>
 <html lang="zh-CN">
@@ -498,10 +784,8 @@ HEAD_TMPL = """<!DOCTYPE html>
 <meta property="og:title" content="__TITLE__">
 <meta property="og:description" content="__DESC__">
 <meta property="og:type" content="__OGTYPE__">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90' fill='%23c9a45c'%3E%E2%9C%A0%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Cinzel:wght@400;600&family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
+<link rel="icon" href="__FAVICON__">
+__FONTS__
 <link rel="stylesheet" href="__CSS__">
 </head>
 <body>
@@ -509,18 +793,23 @@ HEAD_TMPL = """<!DOCTYPE html>
 
 HEADER_TMPL = """
 <header class="site-header">
-  <div class="sigil">✠ ✠ ✠</div>
-  <h1 class="site-title"><a href="__HOME__" style="color:inherit;-webkit-text-fill-color:inherit;">__SITENAME__</a></h1>
+  <div class="container">
+  <div class="sigil">__SIGIL__</div>
+  <h1 class="site-title"><a href="__HOME__" style="color:inherit;">__SITENAME__</a></h1>
   <p class="site-latin">__SITELATIN__</p>
-  <div class="rule"><span class="orn">☾ ✠ ☽</span></div>
+  <div class="rule"><span class="orn">__RULE_ORN__</span></div>
   <p class="tagline">__TAGLINE__</p>
+  __HERO__
+  </div>
 </header>
 """
 
 FOOTER_TMPL = """
 <footer class="site-footer">
+  <div class="container">
   <div><span class="orn">✠</span>&nbsp;&nbsp;__SITENAME__ · __YEAR__&nbsp;&nbsp;<span class="orn">✠</span></div>
-  <div style="margin-top:8px;">手稿存于 <a href="__GITHUB__" target="_blank" rel="noopener">GitHub</a> · 由 GitHub Actions 铸造</div>
+  <div style="margin-top:8px;">__FOOTNOTE__</div>
+  </div>
 </footer>
 </body>
 </html>
@@ -531,7 +820,7 @@ INDEX_CARD_TMPL = """
   <h2>__TITLE__</h2>
   <div class="meta">__DATE__<span class="sep">✠</span>约 __WORDS__ 字<span class="sep">✠</span>阅读约 __MINUTES__ 分钟</div>
   <p class="excerpt">__EXCERPT__</p>
-  <span class="enter">✠ ▸</span>
+  <span class="enter">__ENTER__</span>
 </a>
 """
 
@@ -542,18 +831,12 @@ POST_TMPL = """
     <h1>__TITLE__</h1>
     <div class="meta">__DATE__<span class="sep">✠</span>约 __WORDS__ 字<span class="sep">✠</span>阅读约 __MINUTES__ 分钟</div>
   </div>
-  <div class="post-rule">✠ ── ☾ ── ✠</div>
+  <div class="post-rule">__POST_RULE__</div>
   <article class="content">
 __BODY__
   </article>
 </main>
 """
-
-
-def fill(tmpl: str, **kw) -> str:
-    for k, v in kw.items():
-        tmpl = tmpl.replace("__" + k + "__", str(v))
-    return tmpl
 
 
 # ────────────────────────── 构建 ──────────────────────────
@@ -591,21 +874,28 @@ def collect_articles():
     return articles
 
 
-def build():
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    POSTS_OUT.mkdir(parents=True)
+def build(theme_name: str = None, out_dir: Path = None):
+    theme_name = theme_name or THEME
+    if theme_name not in THEMES:
+        sys.exit(f"未知主题：{theme_name}（可选：{' / '.join(THEMES)}）")
+    theme = THEMES[theme_name]
+    out = Path(out_dir) if out_dir else OUT
+    posts_out = out / "posts"
+
+    if out.exists():
+        shutil.rmtree(out)
+    posts_out.mkdir(parents=True)
 
     # 图片目录整体拷贝
     if (ROOT / "images").exists():
-        shutil.copytree(ROOT / "images", OUT / "images", dirs_exist_ok=True)
+        shutil.copytree(ROOT / "images", out / "images", dirs_exist_ok=True)
 
-    (OUT / "style.css").write_text(CSS.strip() + "\n", encoding="utf-8")
+    (out / "style.css").write_text(theme["css"].strip() + "\n", encoding="utf-8")
 
     articles = collect_articles()
     year = datetime.now().year
 
-    footer = fill(FOOTER_TMPL, SITENAME=SITE_NAME, YEAR=year, GITHUB=SITE_GITHUB)
+    footer = fill(FOOTER_TMPL, SITENAME=SITE_NAME, YEAR=year, FOOTNOTE=theme["footnote"])
 
     # ── 文章页 ──
     for a in articles:
@@ -614,6 +904,8 @@ def build():
                     TITLE=html.escape(a["title"]) + " · " + SITE_NAME,
                     DESC=html.escape(a["excerpt"][:80]),
                     OGTYPE="article",
+                    FAVICON=theme["favicon"],
+                    FONTS=theme["fonts"],
                     CSS="../style.css")
         page += fill(POST_TMPL,
                      SITENAME=SITE_NAME,
@@ -621,9 +913,10 @@ def build():
                      DATE=a["date"].strftime("%Y年%m月%d日").replace("年0", "年").replace("月0", "月"),
                      WORDS=f"{a['words']:,}",
                      MINUTES=a["minutes"],
+                     POST_RULE=theme["post_rule"],
                      BODY=body)
         page += footer
-        (POSTS_OUT / f"{a['slug']}.html").write_text(page, encoding="utf-8")
+        (posts_out / f"{a['slug']}.html").write_text(page, encoding="utf-8")
 
     # ── 首页 ──
     cards = "".join(
@@ -633,6 +926,7 @@ def build():
              DATE=a["date"].strftime("%Y年%m月%d日").replace("年0", "年").replace("月0", "月"),
              WORDS=f"{a['words']:,}",
              MINUTES=a["minutes"],
+             ENTER=theme["enter"],
              EXCERPT=html.escape(a["excerpt"]))
         for a in articles
     )
@@ -640,17 +934,29 @@ def build():
                  TITLE=f"{SITE_NAME} · {SITE_LATIN}",
                  DESC=html.escape(SITE_TAGLINE),
                  OGTYPE="website",
+                 FAVICON=theme["favicon"],
+                 FONTS=theme["fonts"],
                  CSS="style.css")
-    index += fill(HEADER_TMPL, SITENAME=SITE_NAME, SITELATIN=SITE_LATIN,
-                  TAGLINE=SITE_TAGLINE, HOME="index.html")
-    index += f'<main class="container">\n<div class="archive-count">共收录 {len(articles)} 篇手稿</div>\n{cards}\n</main>\n'
+    index += fill(HEADER_TMPL,
+                  SITENAME=SITE_NAME, SITELATIN=SITE_LATIN,
+                  TAGLINE=SITE_TAGLINE, HOME="index.html",
+                  SIGIL=theme["sigil"], RULE_ORN=theme["rule_orn"],
+                  HERO=theme["hero"])
+    index += (f'<main class="container">\n'
+              f'<div class="archive-count">共收录 {len(articles)} 篇手稿</div>\n'
+              f'<div class="cards">\n{cards}\n</div>\n</main>\n')
     index += footer
-    (OUT / "index.html").write_text(index, encoding="utf-8")
+    (out / "index.html").write_text(index, encoding="utf-8")
 
-    print(f"[build] 生成 {len(articles)} 篇文章 → {OUT}")
+    print(f"[build:{theme_name}] {theme['label']} → {out}")
     for a in articles:
         print(f"  - {a['date']:%Y-%m-%d}  {a['title']}  ({a['words']}字)  posts/{a['slug']}.html")
 
 
 if __name__ == "__main__":
-    build()
+    ap = argparse.ArgumentParser(description="偏执病患 · 粗野主义静态站点生成器")
+    ap.add_argument("--theme", default=THEME, choices=list(THEMES),
+                    help="选择主题（默认见脚本内 THEME 常量）")
+    ap.add_argument("--out", default=None, help="输出目录（默认 _site/）")
+    args = ap.parse_args()
+    build(args.theme, Path(args.out) if args.out else None)

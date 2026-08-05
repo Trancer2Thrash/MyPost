@@ -1,6 +1,8 @@
 # 偏执病患 · MyPost
 
-黑暗、金属、哥特、奇幻风格的乐评存档站。
+粗野主义（Brutalism）风格的乐评存档站：白纸复印杂志视觉，等宽字体、粗黑边框、红黄撞色、混凝土配图。
+
+风格参考 brutalistwebsites.com / onepagelove.com。
 
 ## 结构
 
@@ -39,5 +41,6 @@ python -m http.server -d _site 8000
 ## 站点说明
 
 - 站名、副标题、标语在 `scripts/build_site.py` 顶部的常量里，可自由修改；
+- 内置三套粗野主义主题（`--theme brutal-zine / brutal-raw / brutal-terminal`），默认 `brutal-zine`；
 - 文章日期取 git 首次提交时间；字数按「汉字逐字 + 英文按词」统计；
 - slug 用拼音生成，中英文标题都能正确转成 URL。
