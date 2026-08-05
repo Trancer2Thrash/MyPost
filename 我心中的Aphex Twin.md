@@ -1,6 +1,6 @@
 # 我心中的 Aphex Twin
 
-![Aphex Twin 官方视觉图片，来自 Warp Records 艺人页面](images/aphex-twin-warp.jpg)
+![Aphex Twin 官方视觉图片，来自 Warp Records 艺人页面](images/aphex-twin/aphex-twin-warp.jpg)
 
 *图：Warp Records 的 Aphex Twin 官方视觉图片，以标志性的畸变面孔延续其怪诞形象。图片来源：[Warp Records 官方艺人页面](https://warp.net/artists/aphex-twin)。*
 
@@ -38,11 +38,11 @@ Aphex Twin 不是一支双人组合，而是英国电子音乐人 **Richard Davi
 6. **《Syro》**（2014）  
    在漫长的专辑空窗后归来，并获得格莱美“最佳舞曲／电子专辑”。它没有简单复刻九十年代，而把多年的设备经验编成一座流动迷宫：模拟合成器彼此交谈，放克、acid、electro 和精密节拍不断变形。它成熟，却不驯服；复杂，却有奇妙的肉身摇摆。
 
-![《Selected Ambient Works 85–92》封面](images/selected-ambient-works-85-92.jpg)
+![《Selected Ambient Works 85–92》封面](images/aphex-twin/selected-ambient-works-85-92.jpg)
 
 *图：《Selected Ambient Works 85–92》（1992）专辑封面。*
 
-![《Drukqs》封面](images/drukqs.jpg)
+![《Drukqs》封面](images/aphex-twin/drukqs.jpg)
 
 *图：《Drukqs》（2001）专辑封面，`Avril 14th` 收录于此。*
 
@@ -93,7 +93,7 @@ Aphex Twin 不是一支双人组合，而是英国电子音乐人 **Richard Davi
 - *Collapse EP*（2018）
 - *Blackbox Life Recorder 21f / in a room7 F760*（2023）
 
-![《Syro》封面](images/syro.jpg)
+![《Syro》封面](images/aphex-twin/syro.jpg)
 
 *图：《Syro》（2014）专辑封面。*
 
