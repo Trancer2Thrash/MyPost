@@ -531,7 +531,7 @@ INDEX_CARD_TMPL = """
   <h2>__TITLE__</h2>
   <div class="meta">__DATE__<span class="sep">✠</span>约 __WORDS__ 字<span class="sep">✠</span>阅读约 __MINUTES__ 分钟</div>
   <p class="excerpt">__EXCERPT__</p>
-  <span class="enter">推开此门 ▸</span>
+  <span class="enter">✠ ▸</span>
 </a>
 """
 
