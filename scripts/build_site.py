@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-夜路回声 · 静态站点生成器
+偏执病患 · 静态站点生成器
 ========================
 把仓库根目录下的 Markdown 乐评文章转换成黑暗哥特风格的静态网站，
 输出到 _site/，由 GitHub Actions 部署到 GitHub Pages。
