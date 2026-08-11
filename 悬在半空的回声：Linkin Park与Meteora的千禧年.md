@@ -216,5 +216,3 @@ Linkin Park 的影响并不限于后来有多少乐队采用“说唱主歌＋�
 - Discogs Public API：[《Meteora》2003 年发行与制作／美术名单](https://api.discogs.com/releases/567665)
 - Billboard：[《Numb》成为乐队首支 YouTube 十亿观看音乐录像](https://www.billboard.com/music/rock/linkin-park-numb-video-1-billion-views-youtube-8484819/)
 - Apple Music：[Linkin Park 官方唱片目录](https://music.apple.com/us/artist/linkin-park/148662)（本文十张封面及发行元数据）
-
-*说明：RIAA 查询页在本次网络环境中持续返回访问限制，因此正文只采用 Linkin Park 官方传记已经明确确认的《Hybrid Theory》钻石认证，不写无法从 RIAA 原页重新核验的具体多白金倍数。关于 Chester 的死亡，仅采用可靠机构与主流报道核实日期和官方裁定，不描述方法、不推测动机，也不把创伤写成艺术成就的原因。*
