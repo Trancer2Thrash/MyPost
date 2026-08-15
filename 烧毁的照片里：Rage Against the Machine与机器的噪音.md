@@ -12,7 +12,7 @@
 
 ## 一、机器的名字
 
-一九九一年，洛杉矶。Tom Morello 是一个刚从哈佛大学社会研究系毕业的吉他手，在 Lock Up 乐队里弹吉他，日子过得紧巴巴。Zack de la Rocha 是 Inside Out 乐队的主唱，声音像一把生锈的刀。Lock Up 的吉他手把 Commerford 和 Zack 介绍给 Morello，四个人凑在一起。Morello 随后找来了 Brad Wilk——Wilk 之前给 Lock Up 试镜失败，也给后来成为 Pearl Jam 的那支乐队试镜失败。
+一九九一年，洛杉矶。Tom Morello 是一个刚从哈佛大学社会研究系毕业的吉他手，在 Lock Up 乐队里弹吉他，日子过得紧巴巴。他想把海湾战争、种族隔离的终结、苏联解体搅动的时代情绪做成音乐——他登了一则招聘广告，要求"一个喜欢 Black Sabbath 和 Public Enemy 的社会主义主唱"。一年后他找到了 Zack de la Rocha：Inside Out 乐队的主唱，墨西哥著名壁画家的儿子，在东洛杉矶和尔湾之间长大的朋克。Lock Up 的吉他手把 Commerford 和 Zack 介绍给 Morello，四个人凑在一起。Morello 随后找来了 Brad Wilk——Wilk 之前给 Lock Up 试镜失败，也给后来成为 Pearl Jam 的那支乐队试镜失败。
 
 乐队名取自 Zack 为 Inside Out 写的一首歌：Rage Against the Machine。那首歌没能录成专辑，但它的名字活了下来。独立厂牌老板、zine 出版人 Kent McClard 早在一九八九年就在他的刊物 No Answers 里用过这个词组。RATM 把它捡起来，变成了旗帜。
 
@@ -85,6 +85,8 @@
 二〇〇〇年一月二十六日，Michael Moore 执导《Sleep Now in the Fire》的音乐录影带。拍摄地点：纽约证券交易所门口。没有许可证。乐队开始演奏，警察冲过来，Moore 被带走，他冲着乐队喊："拿下纽约证券交易所！"
 
 那扇大门，关上了。
+
+同年八月，民主党全国大会在洛杉矶召开。RATM 在斯台普斯中心对面的合法抗议区搭起一个小舞台，对着会场开了一场免费演唱会。Zack 站在台上说："兄弟姐妹们，我们的民主被劫持了！"那是乐队七年沉寂之前的最后一场演出。
 
 ## 五、翻唱与解散
 
