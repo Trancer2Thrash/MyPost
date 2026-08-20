@@ -58,6 +58,10 @@ Robert Smith 后来解释这张专辑的参照系：The Psychedelic Furs 的首�
 
 一九八二年到一九八四年是断裂带。《The Top》（1984）是 Smith 几乎一个人的专辑，迷幻、杂耍、孤独。然后 Simon Gallup 回来了。
 
+![《The Top》封面](images/the-cure/the-top.jpg)
+
+*图：《The Top》（1984，Fiction）封面。蓝红黄黑扎染底色上手写"the Top"。图片来源：[Apple Music](https://music.apple.com/us/album/the-top/286646424)。*
+
 ![《The Head on the Door》封面](images/the-cure/head-on-the-door.jpg)
 
 *图：《The Head on the Door》（1985，Fiction）封面。黑底上一团晃动的黄白光迹，左侧蓝色手写体专辑名。图片来源：[Apple Music](https://music.apple.com/us/album/the-head-on-the-door/282971465)。*
@@ -112,7 +116,19 @@ Pitchfork 的三部曲回顾评论里有一句话，常被引用：The Cure 后�
 
 二〇〇〇年二月，《Bloodflowers》发行。Smith 说这是"三部曲"的第三部——《Pornography》《Disintegration》《Bloodflowers》。之后乐队一度打算解散。
 
+![《Bloodflowers》封面](images/the-cure/bloodflowers.jpg)
+
+*图：《Bloodflowers》（2000，Fiction/Polydor）封面。黑底上一张过曝感的人像，红色阴影。图片来源：[Apple Music](https://music.apple.com/us/album/bloodflowers/154235718)。*
+
 二〇〇四年六月，同名专辑《The Cure》发行，Ross Robinson 制作，更硬、更直接。二〇〇八年，《4:13 Dream》。然后，是十六年的沉默。
+
+![《The Cure》（2004）封面](images/the-cure/the-cure-2004.jpg)
+
+*图：《The Cure》（2004，Geffen）封面。白纸上的儿童涂鸦与剪贴大字。图片来源：[Apple Music](https://music.apple.com/us/album/the-cure/1449750728)。*
+
+![《4:13 Dream》封面](images/the-cure/4-13-dream.jpg)
+
+*图：《4:13 Dream》（2008，Suretone/Geffen）封面。米白底上的稚拙涂鸦脸孔与手掌印。图片来源：[Apple Music](https://music.apple.com/us/album/4-13-dream/1443618164)。*
 
 ![《Songs of a Lost World》封面](images/the-cure/songs-of-a-lost-world.jpg)
 
