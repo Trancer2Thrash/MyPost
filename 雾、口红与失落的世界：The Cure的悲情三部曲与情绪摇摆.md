@@ -24,6 +24,8 @@
 
 Pitchfork 在三部曲豪华版回顾评论里写道：这张专辑的声音"像一间空房间，四个穿黑衣服的人只占据刚刚好的空间，好让你自己游荡进去"。
 
+唱片公司老板 Chris Parry 听过`A Forest`后说："如果你把它做得适合电台播放，你就有一首大热单曲了。"Smith 的回答是："但它听起来就是这样。这就是我脑子里的声音。"这句话大概是 The Cure 全部生涯的说明书。
+
 ## 二、信仰的轮廓
 
 一九八一年四月，《Faith》发行，仍是 Mike Hedges 制作。
@@ -98,7 +100,7 @@ Pitchfork 的三部曲回顾评论里有一句话，常被引用：The Cure 后�
 
 然后是一九九六年五月六日，《Wild Mood Swings》。
 
-这张专辑是 The Cure 生涯里被谈论得最多的一次失手。录音从一九九四年末开始，制作人 Steve Lyon 和 Smith。鼓手 Boris Williams 已经离队，新鼓手 Jason Cooper 还没站稳——2004 年 Smith 对 Rolling Stone 回忆："我们每周换一个鼓手。我常常记不住那天打鼓的人叫什么名字。"
+这张专辑是 The Cure 生涯里被谈论得最多的一次失手。录音从一九九四年末开始，制作人 Steve Lyon 和 Smith，地点在 Bath 附近的 St Catherine's Court——一座都铎庄园，The Cure 是第一支在这里录音的乐队，几年后 Radiohead 在这里录了《OK Computer》。鼓手 Boris Williams 已经离队，新鼓手 Jason Cooper 还没站稳——整张专辑用了四位鼓手。2004 年 Smith 对 Rolling Stone 回忆："我们每周换一个鼓手。我常常记不住那天打鼓的人叫什么名字。"专辑里有真实的弦乐四重奏、铜管、印度乐团和墨西哥小号——Smith 说："这张专辑里的一切都是真的。"
 
 专辑在英国榜第九、美国 Billboard 200 第十二。单曲依次是`The 13th`、`Mint Car`、`Strange Attraction`、`Gone!`。`The 13th`带着一种"疯掉的 salsa 感"（Smith 自己的话），乐迷不买账。
 
@@ -134,7 +136,7 @@ Pitchfork 的三部曲回顾评论里有一句话，常被引用：The Cure 后�
 
 *图：《Songs of a Lost World》（2024，Fiction/Lost Music）封面。黑布上躺着一尊粗糙的石雕人头。图片来源：[Apple Music](https://music.apple.com/us/album/songs-of-a-lost-world/1768728131)。*
 
-二〇二四年十一月一日，《Songs of a Lost World》发行——十四年来第一张全新专辑，所有歌曲由 Robert Smith 独立作曲，这是多年来的第一次。这一次没有失手：Metacritic 93 分，AllMusic 四星半，Clash 给了九分。专辑在多国登顶。二〇一九年，他们入选摇滚名人堂；这一年 Smith 六十五岁，仍然画着标志性的黑色口红和晕开的眼睛。
+二〇二四年十一月一日，《Songs of a Lost World》发行——十六年来第一张全新专辑，所有歌曲由 Robert Smith 独立作曲，这是多年来的第一次。这一次没有失手：Metacritic 93 分，AllMusic 四星半，Clash 给了九分。专辑在多国登顶。二〇一九年，他们入选摇滚名人堂；二〇二六年二月，第68届格莱美把最佳另类音乐专辑（《Songs of a Lost World》）和最佳另类音乐演奏（`Alone`）都给了他们——乐队成立五十年，第一次拿到格莱美。这一年 Smith 六十五岁，仍然画着标志性的黑色口红和晕开的眼睛。
 
 从十七秒的雾，到失落的世界，四十四年。
 
